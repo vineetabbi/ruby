@@ -1,11 +1,13 @@
 # Node is the data structure used for Binary Search Tree Node.
 # Node has data, and reference to left and right nodes 
+# version 2 - adding level to tree
 class Node
-  attr_reader :data             # we want data to be read only, set only during creating the node
+  attr_reader :data, :level     # we want data to be read only, set only during creating the node
   attr_accessor :left, :right   # left and right nodes will be set in the tree
 
-  def initialize(data = 0, left = nil, right = nil)
+  def initialize(data = 0, level = -1, left = nil, right = nil)
     @data = data
+    @level = level
     @left = left
     @right = right
   end
@@ -49,11 +51,17 @@ class Tree
   end
 
   # Breadth First traversal of binary tree (level by level from left to right)
-  def breadthfirst(node = @root)
+  # in version 2 adding the splitLevel option to print the tree as per levels
+  def breadthfirst(splitLevel = false, node = @root)
     queue = []
+    preLevel = 0
     queue << node if (nil != node) # add root to queue
     until (queue.empty?)
        removedNode = queue.shift
+       if (splitLevel and preLevel < removedNode.level)
+         puts " "
+         preLevel += 1
+       end
        removedNode.printnode
        queue << removedNode.left if (nil != removedNode.left)
        queue << removedNode.right if (nil != removedNode.right)
@@ -63,16 +71,17 @@ class Tree
   # insert data into binary search tree
   # start with the root node of binary search tree and check recursively data 
   # and decide to go left or right, when reached end, create new node and set parent left or right
-  def insert(data, node = @root)
+  def insert(data, level = 0, node = @root)
     if (nil == node) then
-       n = Node.new(data)
+       n = Node.new(data, level)
        @root = n if (nil == @root)
        return n
     end
+    level += 1
     if (data < node.data)
-       node.left = insert(data, node.left)
+       node.left = insert(data, level, node.left)
     elsif (data > node.data)
-       node.right = insert(data, node.right)
+       node.right = insert(data, level, node.right)
     end
     # no need to add duplicate node = case
     return node
@@ -98,6 +107,9 @@ puts "Pre: #{t.preorder}"
 puts "In: #{t.inorder}"
 puts "Post: #{t.postorder}"
 puts "BF: #{t.breadthfirst}"
+puts "Tree Structure:"
+puts "---------------"
+puts "#{t.breadthfirst(true)}"
 
 # convert above binary search tree to Double link list
 # Same tree Node structure will be used for Double link list
